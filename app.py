@@ -1,17 +1,19 @@
 from flask import Flask, request
 import requests
+import os
 
 app = Flask(__name__)
 
+# 自分のLINEとOpenAIのキーをここに入れる
 LINE_ACCESS_TOKEN = "TFeUUPncqDT2I2+JOwra4mspAsYSjW37S+cdKFjxetvL2rFb5tWBB7hp5hpSgqLMscXl0JHGu2aZgZywHZ6RI2DTac3DO4d9n/mTpDv4zFNDp4AzUN2d+TFoEhYCLBz/WbKhj2/jt8+toBXm2YW9wwdB04t89/1O/w1cDnyilFU="
-OPENAI_API_KEY = ""
+OPENAI_API_KEY = ""  # ここに自分のOpenAI API Key
 
 @app.route("/webhook", methods=["POST"])
 def webhook():
     data = request.json
 
-    for event in data["events"]:
-        if event["type"] == "message":
+    for event in data.get("events", []):
+        if event.get("type") == "message":
             user_msg = event["message"]["text"]
             reply_token = event["replyToken"]
 
@@ -46,4 +48,6 @@ def webhook():
 
     return "OK"
 
-app.run()
+if __name__ == "__main__":
+    # Render用に必ずhostとportを指定
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
