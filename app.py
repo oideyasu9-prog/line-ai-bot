@@ -6,7 +6,7 @@ app = Flask(__name__)
 
 # ← ここにあなたのAPIキーとLINEアクセストークンを直接書く
 OPENAI_API_KEY = "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"
-LINE_ACCESS_TOKEN =　"TFeUUPncqDT2I2+JOwra4mspAsYSjW37S+cdKFjxetvL2rFb5tWBB7hp5hpSgqLMscXl0JHGu2aZgZywHZ6RI2DTac3DO4d9n/mTpDv4zFNDp4AzUN2d+TFoEhYCLBz/WbKhj2/jt8+toBXm2YW9wwdB04t89/1O/w1cDnyilFU="
+LINE_ACCESS_TOKEN = "TFeUUPncqDT2I2+JOwra4mspAsYSjW37S+cdKFjxetvL2rFb5tWBB7hp5hpSgqLMscXl0JHGu2aZgZywHZ6RI2DTac3DO4d9n/mTpDv4zFNDp4AzUN2d+TFoEhYCLBz/WbKhj2/jt8+toBXm2YW9wwdB04t89/1O/w1cDnyilFU="
 
 @app.route("/")
 def home():
