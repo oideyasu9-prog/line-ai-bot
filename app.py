@@ -33,8 +33,10 @@ def webhook():
                 json=body
             )
 
-            reply = res.json()["choices"][0]["message"]["content"]
+            data = res.json()
+print(data)
 
+reply = data.get("choices", [{}])[0].get("message", {}).get("content", "エラー")
             requests.post(
                 "https://api.line.me/v2/bot/message/reply",
                 headers={
