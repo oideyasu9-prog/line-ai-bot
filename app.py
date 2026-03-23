@@ -5,7 +5,7 @@ import os
 app = Flask(__name__)
 
 # ← ここにあなたのAPIキーとLINEアクセストークンを直接書く
-OPENAI_API_KEY = "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"
+OPENAI_API_KEY = "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"  # GPT-3.5用キー
 LINE_ACCESS_TOKEN = "TFeUUPncqDT2I2+JOwra4mspAsYSjW37S+cdKFjxetvL2rFb5tWBB7hp5hpSgqLMscXl0JHGu2aZgZywHZ6RI2DTac3DO4d9n/mTpDv4zFNDp4AzUN2d+TFoEhYCLBz/WbKhj2/jt8+toBXm2YW9wwdB04t89/1O/w1cDnyilFU="
 
 @app.route("/")
@@ -24,6 +24,8 @@ def webhook():
                 user_message = event["message"]["text"]
                 reply_token = event["replyToken"]
 
+                print("Sending to OpenAI:", user_message)  # 送信前ログ
+
                 # OpenAI API へ送信（無料で使える gpt-3.5-turbo）
                 try:
                     res = requests.post(
@@ -38,8 +40,12 @@ def webhook():
                         },
                         timeout=15
                     )
+                    print("OpenAI response status:", res.status_code)
+                    print("OpenAI response:", res.text)
+
                     res.raise_for_status()
                     ai_reply = res.json()["choices"][0]["message"]["content"]
+
                 except Exception as e:
                     print("OpenAI request failed:", e)
                     ai_reply = "すみません、AIの処理中にエラーが発生しました。"
