@@ -1,55 +1,48 @@
 from flask import Flask, request
 import requests
-import os
 
 app = Flask(__name__)
 
-# 自分のLINEとOpenAIのキーをここに入れる
-LINE_ACCESS_TOKEN = "TFeUUPncqDT2I2+JOwra4mspAsYSjW37S+cdKFjxetvL2rFb5tWBB7hp5hpSgqLMscXl0JHGu2aZgZywHZ6RI2DTac3DO4d9n/mTpDv4zFNDp4AzUN2d+TFoEhYCLBz/WbKhj2/jt8+toBXm2YW9wwdB04t89/1O/w1cDnyilFU="
-OPENAI_API_KEY = ""  # ここに自分のOpenAI API Key
+@app.route("/")
+def home():
+    return "OK"
 
 @app.route("/webhook", methods=["POST"])
 def webhook():
     data = request.json
 
-    for event in data.get("events", []):
-        if event.get("type") == "message":
-            user_msg = event["message"]["text"]
-            reply_token = event["replyToken"]
+    user_message = data["events"][0]["message"]["text"]
 
-            headers = {
-                "Authorization": f"Bearer {OPENAI_API_KEY}",
-                "Content-Type": "application/json"
-            }
+    res = requests.post(
+        "https://api.openai.com/v1/chat/completions",
+        headers={
+            "Authorization": "Bearer あなたのAPIキー",
+            "Content-Type": "application/json"
+        },
+        json={
+            "model": "gpt-4o-mini",
+            "messages": [{"role": "user", "content": user_message}]
+        }
+    )
 
-            body = {
-                "model": "gpt-4o-mini",
-                "messages": [{"role": "user", "content": user_msg}]
-            }
+    data = res.json()
+    print(data)
 
-            res = requests.post(
-                "https://api.openai.com/v1/chat/completions",
-                headers=headers,
-                json=body
-            )
+    reply = data.get("choices", [{}])[0].get("message", {}).get("content", "エラー")
 
-            data = res.json()
-print(data)
-
-reply = data.get("choices", [{}])[0].get("message", {}).get("content", "エラー")
-            requests.post(
-                "https://api.line.me/v2/bot/message/reply",
-                headers={
-                    "Authorization": f"Bearer {LINE_ACCESS_TOKEN}"
-                },
-                json={
-                    "replyToken": reply_token,
-                    "messages": [{"type": "text", "text": reply}]
-                }
-            )
+    requests.post(
+        "https://api.line.me/v2/bot/message/reply",
+        headers={
+            "Authorization": "Bearer あなたのLINEトークン",
+            "Content-Type": "application/json"
+        },
+        json={
+            "replyToken": data["events"][0]["replyToken"],
+            "messages": [{"type": "text", "text": reply}]
+        }
+    )
 
     return "OK"
 
 if __name__ == "__main__":
-    # Render用に必ずhostとportを指定
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
+    app.run(host="0.0.0.0", port=10000)
