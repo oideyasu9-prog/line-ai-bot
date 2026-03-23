@@ -16,28 +16,30 @@ def home():
 def webhook():
     try:
         body = request.json
-        print("Received body:", body)  # ここでLINEからのJSONを確認できる
+        print("Received body:", body)  # LINEからのメッセージ確認用
 
         events = body.get("events", [])
         for event in events:
-            # テキストメッセージのみ処理
             if event.get("type") == "message" and event["message"]["type"] == "text":
                 user_message = event["message"]["text"]
                 reply_token = event["replyToken"]
 
-                # OpenAI に送信
+                # OpenAI API へ送信（無料で使える gpt-3.5-turbo）
                 try:
                     res = requests.post(
-                        "https://api.openai.com/v1/responses",
+                        "https://api.openai.com/v1/chat/completions",
                         headers={
                             "Authorization": f"Bearer {OPENAI_API_KEY}",
                             "Content-Type": "application/json"
                         },
-                        json={"model": "gpt-4.1-mini", "input": user_message},
+                        json={
+                            "model": "gpt-3.5-turbo",
+                            "messages": [{"role": "user", "content": user_message}]
+                        },
                         timeout=15
                     )
                     res.raise_for_status()
-                    ai_reply = res.json()["output"][0]["content"][0]["text"]
+                    ai_reply = res.json()["choices"][0]["message"]["content"]
                 except Exception as e:
                     print("OpenAI request failed:", e)
                     ai_reply = "すみません、AIの処理中にエラーが発生しました。"
